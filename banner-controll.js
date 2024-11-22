@@ -44,12 +44,12 @@ var darkModeDefault = localStorage.getItem("viewMode") ? localStorage.getItem("v
 
 var showIconOfModes = true;
 
-var secondBannerEnable = true;
+var secondBannerEnable = false;
 var defaultConsent = false;
 
 var onClickAccept = "granted";
 var onClickCustom = "normal";
-var onClickDeclined = "denied";
+var onClickDeclined = "granted";
 
 var onClickAcceptSecond = "granted";
 var onClickDeclinedSecond = "denied";
@@ -72,33 +72,36 @@ function gtag() {
 var consentValue = ["granted", "denied"];
 
 var consent = {
-	ad_storage: defaultConsent ? "granted" : 'denied',
-	ad_user_data: defaultConsent ? "granted" : 'denied',
-	ad_personalization: defaultConsent ? "granted" : 'denied',
-	analytics_storage: defaultConsent ? "granted" : 'denied',
-	functionality_storage: defaultConsent ? "granted" : 'denied',
-	personalization_storage: defaultConsent ? "granted" : 'denied',
-	unclassified_storage: defaultConsent ? "granted" : 'denied',
+    ad_storage: defaultConsent ? "granted" : 'denied',
+    ad_user_data: defaultConsent ? "granted" : 'denied',
+    ad_personalization: defaultConsent ? "granted" : 'denied',
+    analytics_storage: defaultConsent ? "granted" : 'denied',
+    functionality_storage: defaultConsent ? "granted" : 'denied',
+    personalization_storage: defaultConsent ? "granted" : 'denied',
+    unclassified_storage: defaultConsent ? "granted" : 'denied',
+    security_storage: defaultConsent ? "granted" : 'denied'  // New security_storage field
 }
 
 var acceptConsent = {
-	ad_storage: 'granted',
-	ad_user_data: 'granted',
-	ad_personalization: 'granted',
-	analytics_storage: 'granted',
-	functionality_storage: 'granted',
-	personalization_storage: 'granted',
-	unclassified_storage: 'granted',
+    ad_storage: 'granted',
+    ad_user_data: 'granted',
+    ad_personalization: 'granted',
+    analytics_storage: 'granted',
+    functionality_storage: 'granted',
+    personalization_storage: 'granted',
+    unclassified_storage: 'granted',
+    security_storage: 'granted'  // New security_storage field
 }
 
 var declinedConsent = {
-	ad_storage: 'denied',
-	ad_user_data: 'denied',
-	ad_personalization: 'denied',
-	analytics_storage: 'denied',
-	functionality_storage: 'denied',
-	personalization_storage: 'denied',
-	unclassified_storage: 'denied',
+    ad_storage: 'denied',
+    ad_user_data: 'denied',
+    ad_personalization: 'denied',
+    analytics_storage: 'denied',
+    functionality_storage: 'denied',
+    personalization_storage: 'denied',
+    unclassified_storage: 'denied',
+    security_storage: 'granted'  // New security_storage field
 }
 
 gtag('consent', 'default', consent);
@@ -843,33 +846,59 @@ window.addEventListener("load", function() {
 
 					addLoaderAndBlur();
 
-					Object.keys(checkedCategories).forEach((inputCategory, index) => {
-						var convert = bannerCheckBox[index].checked ? "granted" : "denied";
-						checkedCategories[inputCategory] = convert;
-					})
-
-					localStorage.setItem("bannerChoice", JSON.stringify(checkedCategories));
-
-					consent.ad_storage = checkedCategories.Marketing;
-					consent.ad_user_data = checkedCategories.Marketing;
-					consent.ad_personalization = checkedCategories.Marketing;
-					consent.analytics_storage = checkedCategories.Statistics;
-					consent.personalization_storage = checkedCategories.Preferences;
-					consent.functionality_storage = checkedCategories.Preferences;
-					consent.unclassified_storage = consent.Unclassified;
 
 					if (onClickCustom == "normal") {
+
 						addStoredParamsToURL();
+
+                        consent.ad_storage = checkedCategories.Marketing;
+                        consent.ad_user_data = checkedCategories.Marketing;
+                        consent.ad_personalization = checkedCategories.Marketing;
+                        consent.analytics_storage = checkedCategories.Statistics;
+                        consent.personalization_storage = checkedCategories.Preferences;
+                        consent.functionality_storage = checkedCategories.Preferences;
+                        consent.unclassified_storage = consent.Unclassified;
+
+                        Object.keys(checkedCategories).forEach((inputCategory, index) => {
+                            var convert = bannerCheckBox[index].checked ? "granted" : "denied";
+                            checkedCategories[inputCategory] = convert;
+                        })
+    
+
 						gtag('consent', 'update', consent);
 						pushDataLayer(consent, "consent_update")
 					} else if (onClickCustom == "granted") {
 						addStoredParamsToURL();
+
+                        Object.keys(consent).forEach(function(element) {
+                            consent[element] = consentValue[0]
+                        });
+    
+                        Object.keys(checkedCategories).forEach(function(element) {
+                            checkedCategories[element] = consentValue[0]
+                        });
+
+
 						gtag('consent', 'update', acceptConsent);
 						pushDataLayer(acceptConsent, "consent_update")
+
 					} else if (onClickCustom == "denied") {
+
+                        Object.keys(consent).forEach(function(element) {
+                            consent[element] = consentValue[1]
+                        });
+    
+                        Object.keys(checkedCategories).forEach(function(element) {
+                            checkedCategories[element] = consentValue[1]
+                        });
+
+
 						gtag('consent', 'update', declinedConsent);
 						pushDataLayer(declinedConsent, "consent_update")
 					}
+
+                    localStorage.setItem("bannerChoice", JSON.stringify(checkedCategories));
+
 
 					setTimeout(function() {
 						removeLoaderAndBlur();
@@ -882,30 +911,42 @@ window.addEventListener("load", function() {
 
 					addLoaderAndBlur();
 
-					Object.keys(consent).forEach(function(element) {
-						consent[element] = consentValue[0]
-					});
-
-					Object.keys(checkedCategories).forEach(function(element) {
-						checkedCategories[element] = consentValue[0]
-					});
-
 					bannerCheckBox.forEach((input, inputIndex) => {
 						if (inputIndex != 0) {
 							input.checked = true;
 						}
 					})
 
-					localStorage.setItem("bannerChoice", JSON.stringify(checkedCategories));
-
+                
 					if (onClickAccept == "granted") {
+
 						addStoredParamsToURL();
+                        Object.keys(consent).forEach(function(element) {
+                            consent[element] = consentValue[0]
+                        });
+    
+                        Object.keys(checkedCategories).forEach(function(element) {
+                            checkedCategories[element] = consentValue[0]
+                        });
+
 						gtag('consent', 'update', consent);
 						pushDataLayer(consent, "consent_update");
 					} else if (onClickAccept == "denied") {
+
+                        Object.keys(consent).forEach(function(element) {
+                            consent[element] = consentValue[1]
+                        });
+    
+                        Object.keys(checkedCategories).forEach(function(element) {
+                            checkedCategories[element] = consentValue[1]
+                        });
+
 						gtag('consent', 'update', declinedConsent);
 						pushDataLayer(declinedConsent, "consent_update");
 					}
+
+                    localStorage.setItem("bannerChoice", JSON.stringify(checkedCategories));
+
 
 					setTimeout(function() {
 						removeLoaderAndBlur()
@@ -918,31 +959,44 @@ window.addEventListener("load", function() {
 
 					addLoaderAndBlur()
 
-					Object.keys(consent).forEach(function(element) {
-						consent[element] = consentValue[1]
-					})
-
-					Object.keys(checkedCategories).forEach(function(element) {
-						checkedCategories[element] = consentValue[1]
-					});
-
 					bannerCheckBox.forEach((input, inputIndex) => {
 						if (inputIndex != 0) {
 							input.checked = false;
 						}
 					})
 
-					localStorage.setItem("bannerChoice", JSON.stringify(checkedCategories));
+ 
+                    if (onClickDeclined == "denied") {
 
-					if (onClickDeclined == "denied") {
 						gtag('consent', 'update', consent);
 						pushDataLayer(consent, "consent_update");
+
+                        Object.keys(consent).forEach(function(element) {
+                            consent[element] = consentValue[1]
+                        })
+    
+                        Object.keys(checkedCategories).forEach(function(element) {
+                            checkedCategories[element] = consentValue[1]
+                        });
+
 					} else if (onClickDeclined == "granted") {
+
 						addStoredParamsToURL();
+                        
+                        Object.keys(consent).forEach(function(element) {
+                            consent[element] = consentValue[0]
+                        })
+    
+                        Object.keys(checkedCategories).forEach(function(element) {
+                            checkedCategories[element] = consentValue[0]
+                        });
+
 						gtag('consent', 'update', acceptConsent);
 						pushDataLayer(acceptConsent, "consent_update");
 
 					}
+
+                    localStorage.setItem("bannerChoice", JSON.stringify(checkedCategories));
 
 					choiceMade();
 
@@ -1020,13 +1074,35 @@ window.addEventListener("load", function() {
 				document.querySelector(".secondBannerAccept").onclick = function() {
 					secondBanner.style.display = "none";
 					if (onClickAcceptSecond == "denied") {
+                        
+                        Object.keys(consent).forEach(function(element) {
+                            consent[element] = consentValue[1]
+                        })
+    
+                        Object.keys(checkedCategories).forEach(function(element) {
+                            checkedCategories[element] = consentValue[1]
+                        });
+
 						gtag('consent', 'update', declinedConsent);
 						pushDataLayer(declinedConsent, "consent_update");
 					} else if (onClickAcceptSecond == "granted") {
 						addStoredParamsToURL();
+
+                        Object.keys(consent).forEach(function(element) {
+                            consent[element] = consentValue[0]
+                        })
+    
+                        Object.keys(checkedCategories).forEach(function(element) {
+                            checkedCategories[element] = consentValue[0]
+                        });
+
 						gtag('consent', 'update', acceptConsent);
 						pushDataLayer(acceptConsent, "consent_update");
 					}
+
+                    localStorage.setItem("bannerChoice", JSON.stringify(checkedCategories));
+					
+					choiceMade();
 
 					secondBanner.style.display = "none";
 					miniIcon.style.display = "flex";
@@ -1038,13 +1114,34 @@ window.addEventListener("load", function() {
 
 				document.querySelector(".secondBannerDeclined").onclick = function() {
 					if (onClickDeclinedSecond == "denied") {
+                        
+                        Object.keys(consent).forEach(function(element) {
+                            consent[element] = consentValue[1]
+                        })
+    
+                        Object.keys(checkedCategories).forEach(function(element) {
+                            checkedCategories[element] = consentValue[1]
+                        });
+
 						gtag('consent', 'update', declinedConsent);
 						pushDataLayer(declinedConsent, "consent_update");
 					} else if (onClickDeclinedSecond == "granted") {
+
 						addStoredParamsToURL();
+                        
+                        Object.keys(consent).forEach(function(element) {
+                            consent[element] = consentValue[0]
+                        })
+    
+                        Object.keys(checkedCategories).forEach(function(element) {
+                            checkedCategories[element] = consentValue[0]
+                        });
+
 						gtag('consent', 'update', acceptConsent);
 						pushDataLayer(acceptConsent, "consent_update");
 					}
+
+                    localStorage.setItem("bannerChoice", JSON.stringify(checkedCategories));
 
 					secondBanner.style.display = "none";
 					miniIcon.style.display = "flex";
